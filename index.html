@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bachat — Grocery Price Tracker (UX Concept)</title>
+<style>
+  :root{
+    --violet:#7C3AED; --violet-dark:#5B21B6; --violet-tint:#F1EAFE; --violet-soft:#E4D5FB;
+    --ink:#1E1B2E; --muted:#6B6A7D; --line:#EAE7F5; --bg:#FAFAFE; --card:#FFFFFF;
+    --green:#0E9F6E; --green-tint:#E3F6EE; --red:#E5484D; --red-tint:#FDECEC;
+    --amber:#D97706; --amber-tint:#FEF3E2;
+    --radius:16px; --shadow:0 6px 24px rgba(124,58,237,.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5;}
+  .wrap{max-width:1060px; margin:0 auto; padding:0 20px;}
+  /* ---------- Header ---------- */
+  header{background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50;}
+  .head-inner{display:flex; align-items:center; justify-content:space-between; padding:14px 0;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .logo{width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,var(--violet),var(--violet-dark));
+        display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:20px;}
+  .brand h1{font-size:20px; font-weight:800; letter-spacing:-.3px;}
+  .brand small{display:block; font-size:11px; color:var(--muted); font-weight:500; letter-spacing:.4px;}
+  nav.tabs{display:flex; gap:4px; background:var(--violet-tint); padding:4px; border-radius:12px;}
+  nav.tabs button{border:0; background:transparent; padding:9px 16px; border-radius:9px; font-size:14px; font-weight:600;
+    color:var(--violet-dark); cursor:pointer;}
+  nav.tabs button.active{background:#fff; color:var(--violet); box-shadow:0 2px 8px rgba(124,58,237,.15);}
+  /* ---------- Hero ---------- */
+  .hero{padding:40px 0 8px;}
+  .hero .kicker{display:inline-block; background:var(--violet-tint); color:var(--violet-dark); font-size:12px; font-weight:700;
+    padding:6px 12px; border-radius:999px; letter-spacing:.6px; text-transform:uppercase;}
+  .hero h2{font-size:34px; font-weight:800; letter-spacing:-.6px; margin:12px 0 8px;}
+  .hero h2 span{color:var(--violet);}
+  .hero p{color:var(--muted); font-size:16px; max-width:640px;}
+  .hero .meta{margin-top:10px; font-size:13px; color:var(--muted);}
+  .hero .meta b{color:var(--ink);}
+  /* ---------- Sections ---------- */
+  section.panel{display:none; padding:24px 0 60px;}
+  section.panel.active{display:block;}
+  .toolbar{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0;}
+  .toolbar input[type=search]{flex:1; min-width:220px; padding:12px 16px; border:1px solid var(--line); border-radius:12px;
+    font-size:15px; background:#fff;}
+  .toolbar input[type=search]:focus{outline:2px solid var(--violet-soft); border-color:var(--violet);}
+  .filters{display:flex; gap:8px; flex-wrap:wrap;}
+  .filters button{border:1px solid var(--line); background:#fff; padding:9px 15px; border-radius:999px; font-size:13px;
+    font-weight:600; color:var(--muted); cursor:pointer;}
+  .filters button.active{background:var(--violet); border-color:var(--violet); color:#fff;}
+  /* ---------- Price cards ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);}
+  .card .top{display:flex; justify-content:space-between; align-items:center;}
+  .card h3{font-size:16px; font-weight:700;}
+  .card .unit{font-size:12px; color:var(--muted);}
+  .badge{font-size:12px; font-weight:700; padding:5px 10px; border-radius:999px;}
+  .badge.high{background:var(--red-tint); color:var(--red);}
+  .badge.mid{background:var(--amber-tint); color:var(--amber);}
+  .badge.low{background:var(--green-tint); color:var(--green);}
+  .rates{display:flex; gap:12px; margin-top:14px;}
+  .rate{flex:1; border-radius:12px; padding:12px; text-align:center;}
+  .rate.mandi{background:var(--violet-tint);}
+  .rate.retail{background:#F4F3F8;}
+  .rate .lbl{font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--muted);}
+  .rate .val{font-size:19px; font-weight:800; margin-top:4px;}
+  .rate.mandi .val{color:var(--violet-dark);}
+  .card .actions{display:flex; align-items:center; justify-content:space-between; margin-top:14px;}
+  .stepper{display:flex; align-items:center; gap:10px;}
+  .stepper button{width:32px; height:32px; border-radius:10px; border:1px solid var(--line); background:#fff;
+    font-size:17px; font-weight:700; color:var(--violet); cursor:pointer;}
+  .stepper button:hover{background:var(--violet-tint);}
+  .stepper .qty{font-weight:700; min-width:58px; text-align:center; font-size:14px;}
+  .add-btn{background:var(--violet); color:#fff; border:0; padding:10px 18px; border-radius:11px; font-weight:700;
+    font-size:14px; cursor:pointer;}
+  .add-btn:hover{background:var(--violet-dark);}
+  /* ---------- Alerts ---------- */
+  .alerts{display:grid; gap:12px; margin:18px 0 6px;}
+  .alert-card{display:flex; gap:14px; align-items:flex-start; border-radius:var(--radius); padding:16px 18px;}
+  .alert-card.spike{background:var(--red-tint); border:1px solid #F6C9CB;}
+  .alert-card.warn{background:var(--amber-tint); border:1px solid #F3DDb0;}
+  .alert-card.ok{background:var(--green-tint); border:1px solid #BFE7D3;}
+  .alert-ico{font-size:22px; line-height:1;}
+  .alert-card h4{font-size:15px;}
+  .alert-card p{font-size:13.5px; color:#4B4A5E;}
+  /* ---------- Basket ---------- */
+  .basket-layout{display:grid; grid-template-columns:1.4fr 1fr; gap:18px; align-items:start;}
+  @media(max-width:760px){.basket-layout{grid-template-columns:1fr;}}
+  .brow{display:flex; align-items:center; justify-content:space-between; padding:12px 4px; border-bottom:1px solid var(--line);}
+  .brow:last-child{border-bottom:0;}
+  .brow .nm{font-weight:600; font-size:14.5px;}
+  .brow .nm small{display:block; color:var(--muted); font-weight:500; font-size:12px;}
+  .empty{color:var(--muted); text-align:center; padding:34px 10px; font-size:14.5px;}
+  .summary{position:sticky; top:84px;}
+  .sum-row{display:flex; justify-content:space-between; font-size:15px; padding:8px 0;}
+  .sum-row.total{font-weight:800; font-size:17px; border-top:1px dashed var(--line); margin-top:8px; padding-top:14px;}
+  .save-box{background:linear-gradient(135deg,var(--violet),var(--violet-dark)); color:#fff; border-radius:12px;
+    padding:16px; margin-top:14px; text-align:center;}
+  .save-box .lbl{font-size:12px; letter-spacing:.6px; text-transform:uppercase; opacity:.85; font-weight:700;}
+  .save-box .val{font-size:30px; font-weight:800; margin:4px 0;}
+  .save-box small{opacity:.85; font-size:12.5px;}
+  .clear-btn{width:100%; margin-top:12px; background:#fff; border:1px solid var(--line); color:var(--muted);
+    padding:10px; border-radius:11px; font-weight:600; cursor:pointer;}
+  /* ---------- Budget ---------- */
+  .budget-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start;}
+  @media(max-width:760px){.budget-grid{grid-template-columns:1fr;}}
+  .field{margin:12px 0;}
+  .field label{display:block; font-size:13px; font-weight:700; margin-bottom:6px;}
+  .field input,.field select{width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; font-size:15px;}
+  .field input:focus,.field select:focus{outline:2px solid var(--violet-soft); border-color:var(--violet);}
+  .pbar{height:16px; background:#EEEAFB; border-radius:999px; overflow:hidden; margin:10px 0 6px;}
+  .pbar > div{height:100%; border-radius:999px; background:var(--violet); transition:width .4s;}
+  .pbar.warn > div{background:var(--amber);}
+  .pbar.over > div{background:var(--red);}
+  .big-num{font-size:34px; font-weight:800; letter-spacing:-.5px;}
+  .log-row{display:flex; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--line); font-size:14px;}
+  .log-row:last-child{border-bottom:0;}
+  .note{font-size:12.5px; color:var(--muted); margin-top:10px;}
+  footer{border-top:1px solid var(--line); padding:22px 0 34px; color:var(--muted); font-size:13px; text-align:center;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head-inner">
+    <div class="brand">
+      <div class="logo">B</div>
+      <h1>Bachat<small>GROCERY PRICE TRACKER</small></h1>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="active" data-tab="prices">Prices</button>
+      <button data-tab="basket">Basket <span id="basketCount">(0)</span></button>
+      <button data-tab="budget">Budget</button>
+      <button data-tab="alerts">Alerts</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="kicker">Karachi — Daily Rates</span>
+    <h2>Know the mandi rate.<br><span>Never overpay again.</span></h2>
+    <p>Daily sabzi-mandi wholesale rates vs average Karachi retail prices. Build your basket, track your monthly kitchen budget, and get price-spike alerts before mehngai hits.</p>
+    <div class="meta">Updated <b>Today, 12 Oct 2026 — 8:00 AM PKT</b> · Sources: Empress Market wholesale, Sabzi Mandi Super Highway</div>
+  </div>
+
+  <!-- PRICES -->
+  <section class="panel active" id="panel-prices">
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search items — e.g. tamatar, oil, anday…">
+      <div class="filters" id="filters">
+        <button class="active" data-cat="All">All</button>
+        <button data-cat="Grains">Grains</button>
+        <button data-cat="Vegetables">Vegetables</button>
+        <button data-cat="Dairy">Dairy</button>
+        <button data-cat="Meat">Meat</button>
+        <button data-cat="Pantry">Pantry</button>
+      </div>
+    </div>
+    <div class="grid" id="priceGrid"></div>
+  </section>
+
+  <!-- BASKET -->
+  <section class="panel" id="panel-basket">
+    <div class="basket-layout">
+      <div class="card">
+        <h3 style="margin-bottom:6px;">My Basket</h3>
+        <div id="basketRows"><div class="empty">Your basket is empty.<br>Add items from the Prices tab to see your savings.</div></div>
+      </div>
+      <div class="card summary">
+        <h3 style="margin-bottom:8px;">Savings Summary</h3>
+        <div class="sum-row"><span>Mandi total</span><b id="sumMandi">Rs 0</b></div>
+        <div class="sum-row"><span>Avg. retail total</span><b id="sumRetail">Rs 0</b></div>
+        <div class="sum-row total"><span>You save</span><span id="sumSave" style="color:var(--green)">Rs 0</span></div>
+        <div class="save-box">
+          <div class="lbl">Savings vs retail</div>
+          <div class="val" id="saveBig">Rs 0</div>
+          <small id="savePct">Add items to calculate your savings</small>
+        </div>
+        <button class="clear-btn" id="clearBasket">Clear basket</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUDGET -->
+  <section class="panel" id="panel-budget">
+    <div class="budget-grid">
+      <div class="card">
+        <h3 style="margin-bottom:6px;">October Kitchen Budget</h3>
+        <div class="field">
+          <label for="budgetInput">Monthly budget (PKR)</label>
+          <input type="number" id="budgetInput" value="45000" min="1000" step="500">
+        </div>
+        <div class="big-num" id="spentBig">Rs 0</div>
+        <div style="color:var(--muted); font-size:13px;">spent of <b id="budgetLbl" style="color:var(--ink)">Rs 45,000</b></div>
+        <div class="pbar" id="pbar"><div style="width:0%"></div></div>
+        <div id="budgetMsg" style="font-weight:700; font-size:14px;"></div>
+        <div class="note">Demo keeps a few sample purchases pre-logged. Add a purchase to see the tracker respond.</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:6px;">Log a purchase</h3>
+        <div class="field">
+          <label for="logItem">Item</label>
+          <select id="logItem"></select>
+        </div>
+        <div class="field">
+          <label for="logAmount">Amount paid (PKR)</label>
+          <input type="number" id="logAmount" placeholder="e.g. 2400" min="1">
+        </div>
+        <button class="add-btn" id="logBtn" style="width:100%;">Add purchase</button>
+        <h3 style="margin:20px 0 6px;">This month</h3>
+        <div id="logRows"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="panel" id="panel-alerts">
+    <p style="color:var(--muted); margin:18px 0 4px;">Alerts are generated from this week's rate movement. Spikes over 15% get flagged instantly.</p>
+    <div class="alerts" id="alertList"></div>
+  </section>
+</main>
+
+<footer>Bachat — Grocery Price Tracker · UX concept for the Pakistani kitchen · Rates are demo data for illustration</footer>
+
+<script>
+/* ============ Pure data + logic (node-testable) ============ */
+const ITEMS = [
+  {id:'atta',   name:'Atta',           unit:'kg',    cat:'Grains',     mandi:135, retail:158,  spike:0},
+  {id:'chawal', name:'Basmati Chawal', unit:'kg',    cat:'Grains',     mandi:320, retail:395,  spike:8},
+  {id:'cheeni', name:'Cheeni',         unit:'kg',    cat:'Pantry',     mandi:145, retail:172,  spike:0},
+  {id:'oil',    name:'Cooking Oil',    unit:'litre', cat:'Pantry',     mandi:480, retail:545,  spike:0},
+  {id:'doodh',  name:'Doodh',          unit:'litre', cat:'Dairy',      mandi:160, retail:188,  spike:0},
+  {id:'anday',  name:'Anday',          unit:'dozen', cat:'Dairy',      mandi:330, retail:388,  spike:12},
+  {id:'tamatar',name:'Tamatar',        unit:'kg',    cat:'Vegetables', mandi:90,  retail:160,  spike:35},
+  {id:'pyaaz',  name:'Pyaaz',          unit:'kg',    cat:'Vegetables', mandi:70,  retail:110,  spike:18},
+  {id:'aalu',   name:'Aalu',           unit:'kg',    cat:'Vegetables', mandi:60,  retail:95,   spike:0},
+  {id:'chicken',name:'Chicken',        unit:'kg',    cat:'Meat',       mandi:520, retail:612,  spike:0},
+  {id:'daal',   name:'Daal Moong',     unit:'kg',    cat:'Pantry',     mandi:280, retail:338,  spike:0}
+];
+
+function markupPct(item){ return Math.round((item.retail - item.mandi) / item.mandi * 100); }
+
+function basketTotals(basket){
+  let mandi = 0, retail = 0;
+  for (const id in basket){
+    const it = ITEMS.find(i => i.id === id);
+    if (!it) continue;
+    const q = Number(basket[id]) || 0;
+    mandi += it.mandi * q; retail += it.retail * q;
+  }
+  mandi = Math.round(mandi); retail = Math.round(retail);
+  return {mandi, retail, savings: retail - mandi};
+}
+
+function budgetStatus(budget, spent){
+  const pct = budget > 0 ? spent / budget * 100 : 0;
+  const state = pct >= 100 ? 'over' : pct >= 85 ? 'warn' : 'ok';
+  return {pct, state};
+}
+
+function pkr(n){ return 'Rs ' + Math.round(n).toLocaleString('en-PK'); }
+
+/* ============ UI (browser only) ============ */
+if (typeof document !== 'undefined') {
+  const basket = {};                       // id -> qty
+  let activeCat = 'All', query = '';
+  let budget = 45000;
+  const log = [
+    {itemId:'atta', amount:3200, when:'Oct 03'},
+    {itemId:'oil', amount:5450, when:'Oct 05'},
+    {itemId:'tamatar', amount:1600, when:'Oct 07'},
+    {itemId:'doodh', amount:5640, when:'Oct 09'},
+    {itemId:'chicken', amount:3060, when:'Oct 11'}
+  ];
+
+  const $ = id => document.getElementById(id);
+
+  /* Tabs */
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#tabs button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    $('panel-' + b.dataset.tab).classList.add('active');
+  });
+
+  /* Prices */
+  function badgeClass(m){ return m >= 50 ? 'high' : m >= 25 ? 'mid' : 'low'; }
+
+  function renderPrices(){
+    const grid = $('priceGrid'); grid.innerHTML = '';
+    const list = ITEMS.filter(it =>
+      (activeCat === 'All' || it.cat === activeCat) &&
+      it.name.toLowerCase().includes(query.toLowerCase())
+    );
+    if (!list.length){ grid.innerHTML = '<div class="empty">No items match your search.</div>'; return; }
+    for (const it of list){
+      const m = markupPct(it), q = basket[it.id] || 0;
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML =
+        '<div class="top"><div><h3>' + it.name + '</h3><div class="unit">per ' + it.unit + ' · ' + it.cat + '</div></div>' +
+        '<span class="badge ' + badgeClass(m) + '">+' + m + '% markup</span></div>' +
+        '<div class="rates">' +
+          '<div class="rate mandi"><div class="lbl">Mandi rate</div><div class="val">' + pkr(it.mandi) + '</div></div>' +
+          '<div class="rate retail"><div class="lbl">Avg. retail</div><div class="val">' + pkr(it.retail) + '</div></div>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<div class="stepper">' +
+            '<button data-act="dec" data-id="' + it.id + '">−</button>' +
+            '<span class="qty">' + (q ? q + ' ' + it.unit + (q > 1 && it.unit !== 'dozen' ? 's' : '') : '0 ' + it.unit + 's') + '</span>' +
+            '<button data-act="inc" data-id="' + it.id + '">+</button>' +
+          '</div>' +
+          '<button class="add-btn" data-act="add" data-id="' + it.id + '">' + (q ? 'Update' : 'Add') + '</button>' +
+        '</div>';
+      grid.appendChild(el);
+    }
+  }
+
+  $('priceGrid').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const id = b.dataset.id;
+    if (b.dataset.act === 'inc') basket[id] = (basket[id] || 0) + 1;
+    if (b.dataset.act === 'dec') basket[id] = Math.max(0, (basket[id] || 0) - 1);
+    if (b.dataset.act === 'add' && !basket[id]) basket[id] = 1;
+    renderPrices(); renderBasket();
+  });
+
+  $('search').addEventListener('input', e => { query = e.target.value; renderPrices(); });
+  $('filters').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#filters button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); activeCat = b.dataset.cat; renderPrices();
+  });
+
+  /* Basket */
+  function renderBasket(){
+    const rows = $('basketRows'); rows.innerHTML = '';
+    const ids = Object.keys(basket).filter(id => basket[id] > 0);
+    $('basketCount').textContent = '(' + ids.reduce((a, id) => a + basket[id], 0) + ')';
+    if (!ids.length){
+      rows.innerHTML = '<div class="empty">Your basket is empty.<br>Add items from the Prices tab to see your savings.</div>';
+    }
+    for (const id of ids){
+      const it = ITEMS.find(i => i.id === id);
+      const row = document.createElement('div');
+      row.className = 'brow';
+      row.innerHTML =
+        '<div class="nm">' + it.name + '<small>' + pkr(it.mandi) + ' mandi · ' + pkr(it.retail) + ' retail / ' + it.unit + '</small></div>' +
+        '<div class="stepper">' +
+          '<button data-id="' + id + '" data-act="bdec">−</button>' +
+          '<span class="qty">' + basket[id] + '</span>' +
+          '<button data-id="' + id + '" data-act="binc">+</button>' +
+        '</div>';
+      rows.appendChild(row);
+    }
+    const t = basketTotals(basket);
+    $('sumMandi').textContent = pkr(t.mandi);
+    $('sumRetail').textContent = pkr(t.retail);
+    $('sumSave').textContent = pkr(t.savings);
+    $('saveBig').textContent = pkr(t.savings);
+    $('savePct').textContent = t.retail > 0
+      ? 'That is ' + Math.round(t.savings / t.retail * 100) + '% cheaper than average retail'
+      : 'Add items to calculate your savings';
+  }
+
+  $('basketRows').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const id = b.dataset.id;
+    if (b.dataset.act === 'binc') basket[id]++;
+    if (b.dataset.act === 'bdec') basket[id] = Math.max(0, basket[id] - 1);
+    renderPrices(); renderBasket();
+  });
+  $('clearBasket').addEventListener('click', () => {
+    for (const id in basket) delete basket[id];
+    renderPrices(); renderBasket();
+  });
+
+  /* Budget */
+  function renderLog(){
+    const rows = $('logRows'); rows.innerHTML = '';
+    for (const l of log.slice().reverse()){
+      const it = ITEMS.find(i => i.id === l.itemId);
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      row.innerHTML = '<span>' + (it ? it.name : 'Grocery') + ' <small style="color:var(--muted)">· ' + l.when + '</small></span><b>' + pkr(l.amount) + '</b>';
+      rows.appendChild(row);
+    }
+  }
+
+  function renderBudget(){
+    const spent = log.reduce((a, l) => a + l.amount, 0);
+    const st = budgetStatus(budget, spent);
+    $('spentBig').textContent = pkr(spent);
+    $('budgetLbl').textContent = pkr(budget);
+    const bar = $('pbar');
+    bar.className = 'pbar' + (st.state === 'over' ? ' over' : st.state === 'warn' ? ' warn' : '');
+    bar.firstElementChild.style.width = Math.min(100, st.pct) + '%';
+    const msg = $('budgetMsg');
+    if (st.state === 'over'){ msg.textContent = '⚠️ Over budget by ' + pkr(spent - budget) + ' — pause non-essentials.'; msg.style.color = 'var(--red)'; }
+    else if (st.state === 'warn'){ msg.textContent = '⚠️ ' + Math.round(st.pct) + '% used — spending faster than pace.'; msg.style.color = 'var(--amber)'; }
+    else { msg.textContent = '✅ On track — ' + Math.round(st.pct) + '% of budget used.'; msg.style.color = 'var(--green)'; }
+    renderLog();
+  }
+
+  $('budgetInput').addEventListener('input', e => { budget = Math.max(1, Number(e.target.value) || 45000); renderBudget(); });
+  $('logBtn').addEventListener('click', () => {
+    const amt = Number($('logAmount').value);
+    if (!amt || amt <= 0){ $('logAmount').focus(); return; }
+    log.push({itemId: $('logItem').value, amount: amt, when: 'Oct 12'});
+    $('logAmount').value = '';
+    renderBudget();
+  });
+
+  /* Alerts */
+  function renderAlerts(){
+    const box = $('alertList'); box.innerHTML = '';
+    const spikes = ITEMS.filter(i => i.spike >= 15).sort((a, b) => b.spike - a.spike);
+    for (const it of spikes){
+      const el = document.createElement('div');
+      el.className = 'alert-card spike';
+      el.innerHTML = '<div class="alert-ico">📈</div><div><h4>Price spike: ' + it.name + ' +' + it.spike + '% this week</h4>' +
+        '<p>Retail is now ' + pkr(it.retail) + '/' + it.unit + ' vs mandi ' + pkr(it.mandi) + '. ' +
+        (it.id === 'tamatar' ? 'Consider buying early in the week from Empress Market.' : 'Stock up from the mandi while wholesale holds.') + '</p></div>';
+      box.appendChild(el);
+    }
+    const el2 = document.createElement('div');
+    el2.className = 'alert-card warn';
+    el2.innerHTML = '<div class="alert-ico">⏰</div><div><h4>Weekend pattern detected</h4>' +
+      '<p>Vegetable retail prices in Karachi rise ~12% on Saturdays. Your basket is cheapest if bought by Friday evening.</p></div>';
+    box.appendChild(el2);
+    const el3 = document.createElement('div');
+    el3.className = 'alert-card ok';
+    el3.innerHTML = '<div class="alert-ico">✅</div><div><h4>Stable: Atta, Cheeni, Aalu</h4>' +
+      '<p>No major movement this week. Good time to restock staples at the mandi rate.</p></div>';
+    box.appendChild(el3);
+  }
+
+  /* Init */
+  const sel = $('logItem');
+  for (const it of ITEMS){
+    const o = document.createElement('option');
+    o.value = it.id; o.textContent = it.name + ' (per ' + it.unit + ')';
+    sel.appendChild(o);
+  }
+  renderPrices(); renderBasket(); renderBudget(); renderAlerts();
+}
+</script>
+</body>
+</html>
