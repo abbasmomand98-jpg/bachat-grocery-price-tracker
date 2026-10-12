@@ -19,7 +19,7 @@ xdg-open index.html    # Linux
 ```
 
 ## Demo
-Live demo: _(link to be added)_
+Live demo: https://abbasmomand98-jpg.github.io/bachat-grocery-price-tracker/
 
 ## Tech
 Plain HTML + CSS + JavaScript. All prices are realistic demo data for illustration.
